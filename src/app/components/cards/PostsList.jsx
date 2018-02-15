@@ -164,7 +164,8 @@ class PostsList extends React.Component {
                 return;
             }
             
-            
+            // get filter stuff
+            console.log("Rendering the post list with filters " + JSON.stringify(this.props.filters));
             
             const ignore =
                 ignore_result && ignore_result.has(cont.get('author'));

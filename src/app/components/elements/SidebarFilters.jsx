@@ -1,9 +1,39 @@
-import React from 'react';
+import  React  from 'react';
 
-const SidebarFilters = React.createClass ({
-    render: function() {
+class SidebarFilters extends React.Component {
+
+    constructor() {
+        super();
+        this.state = {
+            "filter" : 
+            {"repmin" : 25,
+             "repmax" : 75
+                
+                
+            }
+
+        };
+
+        this.filterchanged = this.filterchanged.bind(this);
+        
+    }
+
+    filterchanged(e)
+    {
+        console.log(e.target.value + " - " + e.target.name); 
+        const copy = Object.assign({}, this.state.filter);
+        copy[e.target.name] = e.target.value;
+  
+         
+        this.setState({"filter" : copy});
+        console.log("filterchanged in sidebar " + JSON.stringify(copy));
+        this.props.filterchanged(copy);
+    }
+
+    render() {
         return (
     <div className="c-sidebar__module">
+   
         <div className="c-sidebar__header">
             <h3 className="c-sidebar__h3">Filters</h3>
         </div>
@@ -11,7 +41,7 @@ const SidebarFilters = React.createClass ({
             <ul className="c-sidebar__list">
                 <li className="c-sidebar__list-item">
                         Author Reputation
-                    <input className="c-sidebar__textboxhalf" value={this.props.repmin} onChange={this.props.repminChange} type="number" placeholder="min rep" ></input><input className="c-sidebar__textboxhalf" type="number" placeholder="max rep" ></input>
+                    <input className="c-sidebar__textboxhalf" name="repmin" value={this.state.filter.repmin}  onChange={(e) => this.filterchanged(e)} type="number" placeholder="min rep" ></input><input name="repmax" className="c-sidebar__textboxhalf" value={this.state.filter.repmax} onChange={(e) => this.filterchanged(e)}type="number" placeholder="max rep" ></input>
                 </li>
                 <li className="c-sidebar__list-item">
                        Post Age (minutes)
@@ -43,7 +73,8 @@ const SidebarFilters = React.createClass ({
         </div>
     </div>
         );
-    },
-});
+    }
+    
+};
 
 export default SidebarFilters;

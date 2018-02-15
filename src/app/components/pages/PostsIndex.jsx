@@ -35,9 +35,19 @@ class PostsIndex extends React.Component {
 
     constructor() {
         super();
-        this.state = {};
+        this.state = {
+            "filters" : null
+        };
         this.loadMore = this.loadMore.bind(this);
+        this.filterchanged = this.filterchanged.bind(this);
         this.shouldComponentUpdate = shouldComponentUpdate(this, 'PostsIndex');
+    }
+
+    filterchanged(filterstate)
+    {
+        // probably need some debounce loop here so that we dont update the state too much
+        console.log("filterchanged" + filterstate + " in postsindex ") ;
+        this.setState({"filters" : filterstate});
     }
 
     componentDidUpdate(prevProps) {
@@ -216,6 +226,7 @@ class PostsIndex extends React.Component {
                             category={category}
                             loadMore={this.loadMore}
                             showSpam={showSpam}
+                            filters={this.state.filters}
                         />
                     )}
                 </article>
@@ -229,7 +240,7 @@ class PostsIndex extends React.Component {
                         </div>
                     )}
                     <div>
-                        <SidebarFilters />
+                        <SidebarFilters filterchanged={this.filterchanged}/>
                     </div>
                 </aside>
 
