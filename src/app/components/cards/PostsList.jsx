@@ -166,25 +166,62 @@ class PostsList extends React.Component {
             }
             
 
-            
+            //Define variables for storing post info
             let reputation;
+            let datecreated;
+            let postage;
+            let wordcount;
+            let payout;
+            let numvotes;
             
+            //Define Filters
             let repmin;
             let repmax;
+            let postagemin;
+            let postagemax;
+            let wordcountmin;
+            let wordcountmax;
+            let payoutmin;
+            let payoutmax;
+            let numvotesmin;
+            let numvotesmax;
+            
+            //Defining the boolean where filter blocks content
             let NotThrough;
             let NotThroughCount;
 
             reputation = repLog10(cont.get('author_reputation'));
+            payout = cont.get('pending_payout_value');
+            datecreated = cont.get('created');
+            
+            
+            console.log(datecreated);
             
             console.log("Rendering the post list with filters " + JSON.stringify(this.props.filters));
             
             if(this.props.filters) {
                 repmin = this.props.filters['repmin'];
                 repmax = this.props.filters['repmax'];
+                postagemin = this.props.filters['postagemin'];
+                postagemax = this.props.filters['postagemax'];  
+                wordcountmin = this.props.filters['wordcountmin'];  
+                wordcountmax = this.props.filters['wordcountmax'];  
+                payoutmin = this.props.filters['payoutmin'];  
+                payoutmax = this.props.filters['payoutmax'];  
+                numvotesmin = this.props.filters['numvotesmin'];  
+                numvotesmax = this.props.filters['numvotesmax'];  
             }
             else {
                 repmin = 25;
-                repmax = 50;
+                repmax = 75;
+                postagemin = 30;
+                postagemax = 1440;
+                wordcountmin = 600;
+                wordcountmax = 2200;
+                payoutmin = 0.1;
+                payoutmax = 10;
+                numvotesmin = 1;
+                numvotesmax = 100;
             }
             
             
