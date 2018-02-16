@@ -4,6 +4,7 @@ import tt from 'counterpart';
 import * as userActions from 'app/redux/UserReducer';
 import { actions as fetchDataSagaActions } from 'app/redux/FetchDataSaga';
 import PostSummary from 'app/components/cards/PostSummary';
+import { parsePayoutAmount, repLog10 } from 'app/utils/ParsersAndFormatters';
 import Post from 'app/components/pages/Post';
 import LoadingIndicator from 'app/components/elements/LoadingIndicator';
 import debounce from 'lodash.debounce';
@@ -111,7 +112,7 @@ class PostsList extends React.Component {
                   ).scrollTop;
         if (
             topPosition(el) + el.offsetHeight - scrollTop - window.innerHeight <
-            10
+            50
         ) {
             const { loadMore, posts, category } = this.props;
             if (loadMore && posts && posts.size)
@@ -125,7 +126,7 @@ class PostsList extends React.Component {
         } else {
             this.setState({ thumbSize: 'desktop' });
         }
-    }, 150);
+    }, 50);
 
     attachScrollListener() {
         window.addEventListener('scroll', this.scrollListener, {
@@ -143,7 +144,7 @@ class PostsList extends React.Component {
         window.removeEventListener('scroll', this.scrollListener);
         window.removeEventListener('resize', this.scrollListener);
     }
-
+    
     render() {
         const {
             posts,
@@ -164,12 +165,50 @@ class PostsList extends React.Component {
                 return;
             }
             
-            // get filter stuff
+
+            
+            let reputation;
+            
+            let repmin;
+            let repmax;
+            let NotThrough;
+            let NotThroughCount;
+
+            reputation = repLog10(cont.get('author_reputation'));
+            
             console.log("Rendering the post list with filters " + JSON.stringify(this.props.filters));
             
-            const ignore =
-                ignore_result && ignore_result.has(cont.get('author'));
+            if(this.props.filters) {
+                repmin = this.props.filters['repmin'];
+                repmax = this.props.filters['repmax'];
+            }
+            else {
+                repmin = 25;
+                repmax = 50;
+            }
             
+            
+            if(reputation > repmax || reputation < repmin) {
+                NotThrough = true;
+                
+            }
+            else {
+                NotThrough = false;
+            }
+            
+            
+            console.log(reputation);
+            
+            console.log(repmin);
+            console.log(repmax);
+            console.log(NotThrough);
+            
+            console.log(NotThroughCount);
+            const ignore =
+                ignore_result && (ignore_result.has(cont.get('author')) || NotThrough );
+            
+            
+            console.log(ignore);
             
             const hide = cont.getIn(['stats', 'hide']);
             if (!(ignore || hide) || showSpam)
@@ -210,6 +249,7 @@ class PostsList extends React.Component {
         );
     }
 }
+
 
 export default connect(
     (state, props) => {
