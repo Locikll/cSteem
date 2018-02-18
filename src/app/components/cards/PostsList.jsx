@@ -9,6 +9,8 @@ import Post from 'app/components/pages/Post';
 import LoadingIndicator from 'app/components/elements/LoadingIndicator';
 import debounce from 'lodash.debounce';
 import SidebarFilters from 'app/components/elements/SidebarFilters';
+import sanitize from 'sanitize-html';
+import { htmlDecode } from 'app/utils/Html';
 import CloseButton from 'react-foundation-components/lib/global/close-button';
 import { findParent } from 'app/utils/DomUtils';
 import Icon from 'app/components/elements/Icon';
@@ -144,6 +146,12 @@ class PostsList extends React.Component {
         window.removeEventListener('scroll', this.scrollListener);
         window.removeEventListener('resize', this.scrollListener);
     }
+
+    
+
+    
+
+
     
     render() {
         const {
@@ -168,11 +176,18 @@ class PostsList extends React.Component {
 
             //Define variables for storing post info
             let reputation;
+            
+            let currentdate;
             let datecreated;
             let postage;
+            let categories
+            
             let wordcount;
+            let numimages;
             let payout;
             let numvotes;
+            let numcomments;
+            
             
             //Define Filters
             let repmin;
@@ -181,51 +196,98 @@ class PostsList extends React.Component {
             let postagemax;
             let wordcountmin;
             let wordcountmax;
+            let numimagemin;
+            let numimagemax;
             let payoutmin;
             let payoutmax;
             let numvotesmin;
             let numvotesmax;
+            let numcommentsmin;
+            let numcommentsmax;
+            let excludetags;
             
             //Defining the boolean where filter blocks content
             let NotThrough;
             let NotThroughCount;
-
+            
+            // Putting values into post info stores
             reputation = repLog10(cont.get('author_reputation'));
-            payout = cont.get('pending_payout_value');
+            payout = cont.get('pending_payout_value').split(' ')[0];
             datecreated = cont.get('created');
+            numvotes = cont.getIn(['stats', 'total_votes']);
+            numcomments = cont.get('children');
+            
+            categories = JSON.parse(cont.get('json_metadata'))["tags"];
+            
+            datecreated = Date.parse(cont.get('created'));
+            currentdate = Date.parse(  new Date( Date.now() + (new Date).getTimezoneOffset()*60000 )  );
+            postage = (currentdate - datecreated)/60000;  
             
             
-            console.log(datecreated);
+            
+            if (JSON.parse(cont.get('json_metadata'))['image']) {
+                numimages = (JSON.parse(cont.get('json_metadata'))['image']).length;
+            }
+            else {
+                numimages = 0;
+            }
+            
+            
+            // If Statements for some Undefined values
+            if(categories === undefined) {
+                categories = "";
+            }
+            
+            
+            
+            //One of the longest one liners here ;)
+            wordcount = (  htmlDecode( sanitize(cont.get('body').replace(/(^(\n|\r|\s)*)>([\s\S]*?).*\s*/g, ''), { allowedTags: [] }) ).replace(/https?:\/\/[^\s]+/g, '')  ).length;
             
             console.log("Rendering the post list with filters " + JSON.stringify(this.props.filters));
             
             if(this.props.filters) {
-                repmin = this.props.filters['repmin'];
-                repmax = this.props.filters['repmax'];
-                postagemin = this.props.filters['postagemin'];
-                postagemax = this.props.filters['postagemax'];  
-                wordcountmin = this.props.filters['wordcountmin'];  
-                wordcountmax = this.props.filters['wordcountmax'];  
-                payoutmin = this.props.filters['payoutmin'];  
-                payoutmax = this.props.filters['payoutmax'];  
-                numvotesmin = this.props.filters['numvotesmin'];  
-                numvotesmax = this.props.filters['numvotesmax'];  
+                repmin = parseFloat(this.props.filters['repmin']);
+                repmax = parseFloat(this.props.filters['repmax']);
+                postagemin = parseFloat(this.props.filters['postagemin']);
+                postagemax = parseFloat(this.props.filters['postagemax']);  
+                wordcountmin = parseFloat(this.props.filters['wordcountmin']);  
+                wordcountmax = parseFloat(this.props.filters['wordcountmax']); 
+                numimagemin = parseFloat(this.props.filters['numimagemin']); 
+                numimagemax =parseFloat(this.props.filters['numimagemax']); 
+                payoutmin = parseFloat(this.props.filters['payoutmin']);  
+                payoutmax = parseFloat(this.props.filters['payoutmax']);  
+                numvotesmin = parseFloat(this.props.filters['numvotesmin']);  
+                numvotesmax = parseFloat(this.props.filters['numvotesmax']);  
+                numcommentsmin = parseFloat(this.props.filters['numcommentsmin']);  
+                numcommentsmax = parseFloat(this.props.filters['numcommentsmax']);  
+                excludetags = String(this.props.filters['excludetags']);
             }
             else {
                 repmin = 25;
                 repmax = 75;
-                postagemin = 30;
-                postagemax = 1440;
+                postagemin = 0;
+                postagemax = 8640;
                 wordcountmin = 600;
                 wordcountmax = 2200;
-                payoutmin = 0.1;
-                payoutmax = 10;
-                numvotesmin = 1;
-                numvotesmax = 100;
+                numimagemin = 0;
+                numimagemax = 15;
+                payoutmin = 0;
+                payoutmax = 2500;
+                numvotesmin = 0;
+                numvotesmax = 1500;
+                numcommentsmin = 0;
+                numcommentsmax = 600;
+                excludetags = "test,spam";
             }
             
+            excludetags = excludetags.split(',');
             
-            if(reputation > repmax || reputation < repmin) {
+            console.log(excludetags);
+            
+            let taginexcluded = excludetags.some(r=> categories.indexOf(r) >= 0 );
+            
+            
+            if(  (reputation > repmax || reputation < repmin) || (wordcount > wordcountmax || wordcount < wordcountmin ) || ( numimages > numimagemax || numimages < numimagemin ) || ( payout > payoutmax || payout < payoutmin ) || ( numvotes > numvotesmax || numvotes < numvotesmin ) || ( postage > postagemax || postage < postagemin )  || ( numcomments > numcommentsmax || numcomments < numcommentsmin ) || ( taginexcluded )  ) {
                 NotThrough = true;
                 
             }
@@ -233,22 +295,14 @@ class PostsList extends React.Component {
                 NotThrough = false;
             }
             
-            
-            console.log(reputation);
-            
-            console.log(repmin);
-            console.log(repmax);
             console.log(NotThrough);
             
-            console.log(NotThroughCount);
             const ignore =
-                ignore_result && (ignore_result.has(cont.get('author')) || NotThrough );
+                ignore_result && (ignore_result.has(cont.get('author'))  );     //   || NotThrough
             
-            
-            console.log(ignore);
             
             const hide = cont.getIn(['stats', 'hide']);
-            if (!(ignore || hide) || showSpam)
+            if (!(ignore || hide || NotThrough ) || showSpam)
                 // rephide
                 postsInfo.push({ item, ignore });
         });
@@ -283,8 +337,10 @@ class PostsList extends React.Component {
                     </center>
                 )}
             </div>
+            
         );
     }
+
 }
 
 
