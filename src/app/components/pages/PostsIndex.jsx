@@ -46,7 +46,6 @@ class PostsIndex extends React.Component {
     filterchanged(filterstate)
     {
         // probably need some debounce loop here so that we dont update the state too much
-        console.log("filterchanged" + filterstate + " in postsindex ") ;
         this.setState({"filters" : filterstate});
     }
 

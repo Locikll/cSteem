@@ -45,6 +45,7 @@ class PostsList extends React.Component {
         this.state = {
             thumbSize: 'desktop',
             showNegativeComments: false,
+            filteredCounts : {"hidden" : 0, "visible" : 0},
         };
         this.scrollListener = this.scrollListener.bind(this);
         this.onBackButton = this.onBackButton.bind(this);
@@ -54,6 +55,14 @@ class PostsList extends React.Component {
 
     componentDidMount() {
         this.attachScrollListener();
+    }
+
+    componentDidUpdate() {
+        // you have updated, see if you have less than 15 visible posts
+        if (this.state.filteredCounts.visible < 15) {
+            console.log("less than 15 posts");
+            this.fetchIfNeeded();
+        }
     }
 
     componentWillUnmount() {
@@ -102,6 +111,7 @@ class PostsList extends React.Component {
     };
 
     scrollListener = debounce(() => {
+        console.log("scrollistener");
         const el = window.document.getElementById('posts_list');
         if (!el) return;
         const scrollTop =
@@ -117,8 +127,11 @@ class PostsList extends React.Component {
             50
         ) {
             const { loadMore, posts, category } = this.props;
-            if (loadMore && posts && posts.size)
-                loadMore(posts.last(), category);
+            if (loadMore && posts && posts.size) {
+               
+                    loadMore(posts.last(), category);
+                
+            }
         }
 
         // Detect if we're in mobile mode (renders larger preview imgs)
@@ -166,6 +179,8 @@ class PostsList extends React.Component {
         } = this.props;
         const { thumbSize } = this.state;
         const postsInfo = [];
+        this.state.filteredCounts.hidden = 0;
+        this.state.filteredCounts.visible = 0;
         posts.forEach(item => {
             const cont = content.get(item);
             if (!cont) {
@@ -243,7 +258,6 @@ class PostsList extends React.Component {
             //One of the longest one liners here ;)
             wordcount = (  htmlDecode( sanitize(cont.get('body').replace(/(^(\n|\r|\s)*)>([\s\S]*?).*\s*/g, ''), { allowedTags: [] }) ).replace(/https?:\/\/[^\s]+/g, '')  ).length;
             
-            console.log("Rendering the post list with filters " + JSON.stringify(this.props.filters));
             
             if(this.props.filters) {
                 repmin = parseFloat(this.props.filters['repmin']);
@@ -282,20 +296,19 @@ class PostsList extends React.Component {
             
             excludetags = excludetags.split(',');
             
-            console.log(excludetags);
-            
             let taginexcluded = excludetags.some(r=> categories.indexOf(r) >= 0 );
             
             
             if(  (reputation > repmax || reputation < repmin) || (wordcount > wordcountmax || wordcount < wordcountmin ) || ( numimages > numimagemax || numimages < numimagemin ) || ( payout > payoutmax || payout < payoutmin ) || ( numvotes > numvotesmax || numvotes < numvotesmin ) || ( postage > postagemax || postage < postagemin )  || ( numcomments > numcommentsmax || numcomments < numcommentsmin ) || ( taginexcluded )  ) {
                 NotThrough = true;
-                
+                this.state.filteredCounts.hidden++;
             }
             else {
                 NotThrough = false;
+                this.state.filteredCounts.visible++;
             }
             
-            console.log(NotThrough);
+            //console.log(NotThrough);
             
             const ignore =
                 ignore_result && (ignore_result.has(cont.get('author'))  );     //   || NotThrough
@@ -306,6 +319,9 @@ class PostsList extends React.Component {
                 // rephide
                 postsInfo.push({ item, ignore });
         });
+
+       
+
         const renderSummary = items =>
             items.map(item => (
                 <li key={item.item}>
@@ -321,6 +337,8 @@ class PostsList extends React.Component {
 
         return (
             <div id="posts_list" className="PostsList">
+            {/* UNCOMMENT THIS TO GET DETAILS OF VISIBLE/HIDDEN */}
+                {/* {this.state.filteredCounts.visible} - {this.state.filteredCounts.hidden} */}
                 <ul
                     className="PostsList__summaries hfeed"
                     itemScope
