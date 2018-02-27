@@ -82,10 +82,6 @@ class Voting extends React.Component {
         this.voteUpOrDown = up => {
             this.setState({ votingUp: up, votingDown: !up });
             
-<<<<<<< HEAD
-=======
-            // console.log("setting state " + JSON.stringify(this.state));
->>>>>>> c864b37587b84ee2ed50f943bd3efa1b9f7c4844
             if (this.props.voting) return;
             const { myVote } = this.state;
             const { author, permlink, username, is_comment } = this.props;
