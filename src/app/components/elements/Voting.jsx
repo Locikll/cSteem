@@ -80,8 +80,9 @@ class Voting extends React.Component {
             this.voteUpOrDown(false);
         };
         this.voteUpOrDown = up => {
-            if (this.props.voting) return;
             this.setState({ votingUp: up, votingDown: !up });
+            
+            if (this.props.voting) return;
             const { myVote } = this.state;
             const { author, permlink, username, is_comment } = this.props;
             if (
@@ -140,6 +141,7 @@ class Voting extends React.Component {
                 });
             }
             this.setState({ showWeight: !this.state.showWeight });
+            this.setState({voteup : up});
         };
         this.shouldComponentUpdate = shouldComponentUpdate(this, 'Voting');
     }
@@ -197,7 +199,6 @@ class Voting extends React.Component {
                 (myVote < 0 ? ' Voting__button--downvoted' : '') +
                 (votingDownActive ? ' votingDown' : '');
             const flagWeight = post_obj.getIn(['stats', 'flagWeight']);
-
             // myVote === current vote
             const dropdown = (
                 <FoundationDropdown
@@ -236,7 +237,6 @@ class Voting extends React.Component {
                     </div>
                 </FoundationDropdown>
             );
-
             const flagClickAction =
                 myVote === null || myVote === 0
                     ? this.toggleWeightDown
@@ -464,14 +464,17 @@ class Voting extends React.Component {
 
         let voteUpClick = this.voteUp;
         let dropdown = null;
+        let downDropDown = null;
         if (
             myVote <= 0 &&
             net_vesting_shares > VOTE_WEIGHT_DROPDOWN_THRESHOLD
         ) {
             voteUpClick = this.toggleWeightUp;
+           // console.log(JSON.stringify(this.state));
+           
             dropdown = (
                 <FoundationDropdown
-                    show={showWeight}
+                    show={this.state.voteup && showWeight}
                     onHide={() => this.setState({ showWeight: false })}
                 >
                     <div className="Voting__adjust_weight">
@@ -507,22 +510,24 @@ class Voting extends React.Component {
             myVote <= 0 &&
             net_vesting_shares > VOTE_WEIGHT_DROPDOWN_THRESHOLD
         ) {
+           
             voteDownClick = this.toggleWeightDown;
-            dropdown = (
+          //  console.log(JSON.stringify(this.state));
+            downDropDown = (
                 <FoundationDropdown
-                    show={showWeight}
+                    show={(!this.state.voteup) && showWeight}
                     onHide={() => this.setState({ showWeight: false })}
                 >
                     <div className="Voting__adjust_weight">
                         <a
                             href="#"
                             onClick={this.voteDown}
-                            className="confirm_weight"
+                            className="confirm_weight_down"
                             title={tt('g.downvote')}
                         >
                             <Icon size="2x" name="chevron-down-circle" />
                         </a>
-                        <div className="weight-display">{weight / 100}%</div>
+                        <div className="weight-display">-{weight / 100}%</div>
                         <Slider
                             min={100}
                             max={10000}
@@ -543,6 +548,8 @@ class Voting extends React.Component {
         //END FLAG STUFF
         
         return (
+
+           
             <span className="Voting">
                 <span className="Voting__inner">
                     <span className={classUp}>
@@ -586,7 +593,7 @@ class Voting extends React.Component {
                                 {down}
                             </a>
                         )}
-                        {dropdown}
+                        {downDropDown}
                     </span>         
                     
                     {payoutEl}

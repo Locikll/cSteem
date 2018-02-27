@@ -142,7 +142,6 @@
 
 /* DOWNVOTE START */
 
-
 .Voting__button-down {
   .Icon {
     margin-left: 0;
@@ -170,7 +169,8 @@
   }
 }
 
-.Voting__button-down > a:hover, a.confirm_weight:hover {
+
+.Voting__button-down > a:hover, a.confirm_weight_down:hover {
     path {
         fill: #fff;
     }
@@ -184,7 +184,7 @@
         background-size: contain;
         border-radius: 50%;
     }
-}
+} 
 
 .Voting__button-down.votingDown {
   padding-right: 0.5rem;
@@ -225,88 +225,7 @@
     }  
 }
 
-
-
 /* DOWNVOTE END */
-
-
-
-
-
-
-
-
-
-
-/*
-PREV CODE
-
-.Voting__button-down.votingDown svg {
-  border: 1px solid $color-red;
-  border-radius: 50%;
-  border-right-color: transparent;
-  border-top-color: transparent;
-  animation: loading 500ms infinite linear;
-}
-
-.Voting__button-down {
-  margin-left: 0rem;
-  padding-right: 0.5rem;
-
-  .Icon {
-    margin-left: 0;
-    border-radius: 50%;
-  }
-  > a {
-    padding-right: 0.25rem;
-  }
-/*
-  path {
-    @include themify($themes) {
-      fill: themed('textColorAccent');
-    }       
-  }
-  circle {
-      @include themify($themes) {
-        stroke: themed('textColorAccent');
-      }       
-  }
-
-
-
-  // exclude small devices
-  @media screen and (min-width: 39.9375em) {
-      .Icon:hover {
-          box-shadow: 0 0 0 $color-red;
-          animation: pulsedv 2s infinite;
-      }
-  }
-    
-  .Voting__button-downvotes {
-    color: #aaa;
-    font-size: 80%;
-    vertical-align: 15%;
-    padding-right: 0.1rem;
-    cursor: default;
-  }
-
-  a:hover path {
-    fill: $color-red;
-  }
-}
-
-
-
-.Voting__button--downvoted path {
-  fill: $color-red;
-}
-
-.Voting__button--downvoted circle {
-  fill: $color-red;
-}
-
-*/
-
 
 .Voting .DropdownMenu ul {
   width: 240px;
@@ -406,6 +325,12 @@ PREV CODE
     line-height: 2.6rem;
   }
   a.confirm_weight {
+    float: left;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2.6rem;
+  }
+  a.confirm_weight_down {
     float: left;
     width: 2rem;
     height: 2rem;
